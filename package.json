@@ -1,8 +1,8 @@
 {
-  "publisher": "antfu",
-  "name": "pnpm-catalog-lens",
-  "displayName": "Catalog Lens",
-  "version": "1.0.2",
+  "publisher": "benkeen",
+  "name": "pnpm-catalog-lens-rush-fork",
+  "displayName": "Catalog Lens - Rush",
+  "version": "1.0.0",
   "private": true,
   "packageManager": "pnpm@10.28.0",
   "description": "Show inlay version for PNPM/Yarn/Bun catalogs",
@@ -34,6 +34,7 @@
     "vscode": "^1.90.0"
   },
   "activationEvents": [
+    "onStartupFinished",
     "workspaceContains:pnpm-workspace.yaml",
     "workspaceContains:.yarnrc.yml",
     "workspaceContains:bun.lock",
@@ -89,6 +90,11 @@
           "type": "boolean",
           "default": true,
           "description": "Show a small label for named catalog in the inlay hint"
+        },
+        "catalogLens.workspaceFilePath": {
+          "type": "string",
+          "default": "",
+          "description": "Custom path to the pnpm-workspace.yaml file, relative to the VS Code workspace root. Useful for monorepos (e.g. Rush) that store the file in a non-standard location such as 'common/temp/pnpm-workspace.yaml'. Leave empty to use auto-detection."
         },
         "pnpmCatalogLens.enabled": {
           "type": "boolean",

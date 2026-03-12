@@ -30,3 +30,7 @@ export function namedCatalogsColorsSalt() {
 export function namedCatalogsLabel() {
   return config.namedCatalogsLabel && backwardsConfig.namedCatalogsLabel
 }
+
+export function workspaceFilePath() {
+  return config.workspaceFilePath || ''
+}

@@ -2,19 +2,61 @@ import type { ObjectProperty, StringLiteral } from '@babel/types'
 import type { DecorationOptions, Selection } from 'vscode'
 import type { JumpLocationParams } from './data'
 
+import { existsSync } from 'node:fs'
+import { join } from 'node:path'
 import { parseSync } from '@babel/core'
 // @ts-expect-error missing types
 import preset from '@babel/preset-typescript'
 import traverse from '@babel/traverse'
 import { computed, defineExtension, executeCommand, shallowRef, toValue as track, useActiveTextEditor, useCommand, useDisposable, useDocumentText, useEditorDecorations, watchEffect } from 'reactive-vscode'
 import { ConfigurationTarget, languages, MarkdownString, Position, Range, Uri, window, workspace } from 'vscode'
-import { config, enabled, hover, namedCatalogsColors, namedCatalogsColorsSalt, namedCatalogsLabel } from './config'
+import { config, enabled, hover, namedCatalogsColors, namedCatalogsColorsSalt, namedCatalogsLabel, workspaceFilePath } from './config'
 import { catalogPrefix, PACKAGE_MANAGERS_NAME } from './constants'
 import { WorkspaceManager } from './data'
 import { commands } from './generated/meta'
 import { getCatalogColor, getNodeRange, logger } from './utils'
 
+const STANDARD_WORKSPACE_FILES = ['pnpm-workspace.yaml', '.yarnrc.yml', 'bun.lock', 'bun.lockb']
+
+/**
+ * Returns true if a relevant workspace file exists at either the root of any
+ * VS Code workspace folder (standard detection) or at the custom path
+ * provided via the `workspaceFilePath` setting.
+ */
+function hasRelevantWorkspaceFile(): boolean {
+  const folders = workspace.workspaceFolders
+  if (!folders || folders.length === 0)
+    return false
+
+  const customPath = workspaceFilePath()
+
+  for (const folder of folders) {
+    const root = folder.uri.fsPath
+
+    // Custom path takes priority: if it's set, only check that location.
+    if (customPath) {
+      if (existsSync(join(root, customPath)))
+        return true
+    }
+    else {
+      // Standard auto-detection: look for any known workspace file at the root.
+      if (STANDARD_WORKSPACE_FILES.some(f => existsSync(join(root, f))))
+        return true
+    }
+  }
+
+  return false
+}
+
 const { activate, deactivate } = defineExtension(() => {
+  // Guard: do nothing if no relevant workspace file exists at the expected
+  // location. This keeps the extension silent in unrelated workspaces when
+  // activated via the `onStartupFinished` event.
+  if (!hasRelevantWorkspaceFile()) {
+    logger.info('No relevant workspace file found; extension is inactive.')
+    return
+  }
+
   const manager = new WorkspaceManager()
 
   const editor = useActiveTextEditor()
@@ -25,6 +67,12 @@ const { activate, deactivate } = defineExtension(() => {
   }))
   useDisposable(workspace.onDidOpenTextDocument(() => {
     tick.value++
+  }))
+  useDisposable(workspace.onDidChangeConfiguration((e) => {
+    if (e.affectsConfiguration('catalogLens.workspaceFilePath')) {
+      manager.clearFindUpCache()
+      tick.value++
+    }
   }))
 
   const doc = computed(() => {

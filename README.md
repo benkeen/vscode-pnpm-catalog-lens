@@ -17,6 +17,20 @@ Show versions inline for <a href="https://pnpm.io/catalogs" target="_blank">pnpm
 <img width="600" alt="Screenshot" src="https://github.com/user-attachments/assets/fc4a6f53-2f1f-4c2e-b154-2f735a8a5f04">
 </p>
 
+
+## This is a fork! 
+
+This is a fork of the https://github.com/antfu/vscode-pnpm-catalog-lens repo, with an additional `catalogLens.workspaceFilePath` setting, to allow for compatibility with monorepos who house the workspace file in locations other than the monorepo root. 
+
+e.g. For a rush-pnpm monorepo, you would add the value: 
+
+> common/temp/pnpm-workspace.yaml
+
+I've made a post to request this change be contributed back to the main repo, but this can be used in the meantime.
+https://github.com/antfu/vscode-pnpm-catalog-lens/issues/33
+
+It's published under `benkeen/pnpm-catalog-lens-rush-fork`.
+
 ## Configs
 
 > [!IMPORTANT]
@@ -24,18 +38,19 @@ Show versions inline for <a href="https://pnpm.io/catalogs" target="_blank">pnpm
 
 <!-- configs -->
 
-| Key                                       | Description                                                         | Type      | Default          |
-| ----------------------------------------- | ------------------------------------------------------------------- | --------- | ---------------- |
-| `catalogLens.enabled`                     | Enable inlay hints                                                  | `boolean` | `true`           |
-| `catalogLens.hover`                       | Show dependency info on hover                                       | `boolean` | `true`           |
-| `catalogLens.namedCatalogsColors`         | Give each named catalog a unique color                              | `boolean` | `true`           |
-| `catalogLens.namedCatalogsColorsSalt`     | A random string to adding as the salt for the named catalogs colors | `string`  | `"catalog-lens"` |
-| `catalogLens.namedCatalogsLabel`          | Show a small label for named catalog in the inlay hint              | `boolean` | `true`           |
-| `pnpmCatalogLens.enabled`                 | Enable inlay hints                                                  | `boolean` | `true`           |
-| `pnpmCatalogLens.hover`                   | Show dependency info on hover                                       | `boolean` | `true`           |
-| `pnpmCatalogLens.namedCatalogsColors`     | Give each named catalog a unique color                              | `boolean` | `true`           |
-| `pnpmCatalogLens.namedCatalogsColorsSalt` | A random string to adding as the salt for the named catalogs colors | `string`  | `"catalog-lens"` |
-| `pnpmCatalogLens.namedCatalogsLabel`      | Show a small label for named catalog in the inlay hint              | `boolean` | `true`           |
+| Key                                       | Description                                                                                                                                                                                                                                        | Type      | Default          |
+| ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ---------------- |
+| `catalogLens.enabled`                     | Enable inlay hints                                                                                                                                                                                                                                 | `boolean` | `true`           |
+| `catalogLens.hover`                       | Show dependency info on hover                                                                                                                                                                                                                      | `boolean` | `true`           |
+| `catalogLens.namedCatalogsColors`         | Give each named catalog a unique color                                                                                                                                                                                                             | `boolean` | `true`           |
+| `catalogLens.namedCatalogsColorsSalt`     | A random string to adding as the salt for the named catalogs colors                                                                                                                                                                                | `string`  | `"catalog-lens"` |
+| `catalogLens.namedCatalogsLabel`          | Show a small label for named catalog in the inlay hint                                                                                                                                                                                             | `boolean` | `true`           |
+| `catalogLens.workspaceFilePath`           | Custom path to the pnpm-workspace.yaml file, relative to the VS Code workspace root. Useful for monorepos (e.g. Rush) that store the file in a non-standard location such as 'common/temp/pnpm-workspace.yaml'. Leave empty to use auto-detection. | `string`  | `""`             |
+| `pnpmCatalogLens.enabled`                 | Enable inlay hints                                                                                                                                                                                                                                 | `boolean` | `true`           |
+| `pnpmCatalogLens.hover`                   | Show dependency info on hover                                                                                                                                                                                                                      | `boolean` | `true`           |
+| `pnpmCatalogLens.namedCatalogsColors`     | Give each named catalog a unique color                                                                                                                                                                                                             | `boolean` | `true`           |
+| `pnpmCatalogLens.namedCatalogsColorsSalt` | A random string to adding as the salt for the named catalogs colors                                                                                                                                                                                | `string`  | `"catalog-lens"` |
+| `pnpmCatalogLens.namedCatalogsLabel`      | Show a small label for named catalog in the inlay hint                                                                                                                                                                                             | `boolean` | `true`           |
 
 <!-- configs -->
 

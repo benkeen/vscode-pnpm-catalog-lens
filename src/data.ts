@@ -3,6 +3,7 @@ import type { Location, TextDocument } from 'vscode'
 import type { AST } from 'yaml-eslint-parser'
 import type { PackageManager } from './types'
 import { dirname, join } from 'node:path'
+import { existsSync } from 'node:fs'
 import { parseSync, traverse } from '@babel/core'
 // @ts-expect-error missing types
 import preset from '@babel/preset-typescript'
@@ -11,6 +12,7 @@ import YAML from 'js-yaml'
 import { Range, Uri, workspace } from 'vscode'
 import { parseYAML } from 'yaml-eslint-parser'
 import { BUN_LOCKS, WORKSPACE_FILES } from './constants'
+import { workspaceFilePath } from './config'
 import { logger } from './utils'
 
 export interface WorkspaceData {
@@ -37,6 +39,15 @@ export class WorkspaceManager {
   private dataMap = new Map<string, WorkspaceData>()
   private findUpCache = new Map<string, WorkspaceInfo>()
   private positionDataMap = new Map<string, WorkspacePositionData>()
+
+  /**
+   * Clears the workspace-resolution cache. Call this when the
+   * `workspaceFilePath` configuration changes so the next resolution
+   * picks up the updated setting.
+   */
+  clearFindUpCache() {
+    this.findUpCache.clear()
+  }
 
   async resolveCatalog(doc: TextDocument, name: string, catalog: string) {
     const workspaceInfo = await this.findWorkspace(doc.uri.fsPath)
@@ -92,6 +103,24 @@ export class WorkspaceManager {
         if (path.startsWith(folder.uri.fsPath)) {
           stopAt = folder.uri.fsPath
           break
+        }
+      }
+    }
+
+    // If the user has configured a custom workspace file path, resolve it
+    // relative to the VS Code workspace root and use it directly.
+    const customRelativePath = workspaceFilePath()
+    if (customRelativePath) {
+      const workspaceRoot = stopAt ?? workspaceFolders?.[0]?.uri.fsPath
+      if (workspaceRoot) {
+        const resolvedPath = join(workspaceRoot, customRelativePath)
+        if (existsSync(resolvedPath)) {
+          const workspaceInfo: WorkspaceInfo = { path: resolvedPath, manager: 'pnpm' }
+          this.findUpCache.set(path, workspaceInfo)
+          return workspaceInfo
+        }
+        else {
+          logger.warn(`Custom workspaceFilePath '${customRelativePath}' resolved to '${resolvedPath}' but the file does not exist.`)
         }
       }
     }
